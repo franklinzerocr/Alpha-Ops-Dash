@@ -45,15 +45,7 @@ export async function fetchRecentSignals(): Promise<SignalItem[]> {
   return get<SignalItem[]>("/api/signals");
 }
 
-// For now we reuse trades shape as a proxy for ops health if needed later.
-// Here we just keep a placeholder, actual ops health is still mocked in backend-less version.
-// You can later add a real /api/ops endpoint if you want.
 export async function fetchOpsHealth(): Promise<OpsHealth> {
-  // Temporary synthetic mapping from backend data is not defined yet,
-  // so we just return a static object to keep the UI working.
-  return {
-    executionEngine: "healthy",
-    signalPipeline: "healthy",
-    connectivityNote: "nominal (backend wired for portfolio & signals)",
-  };
+  return get<OpsHealth>("/api/ops");
 }
+

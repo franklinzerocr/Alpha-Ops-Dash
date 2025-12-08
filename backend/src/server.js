@@ -5,20 +5,24 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 
 // Middlewares
-app.use(cors({
-  origin: "http://localhost:5173", // frontend dev
-}));
+app.use(
+  cors({
+    origin: "http://localhost:5173", // frontend dev origin
+  })
+);
 app.use(express.json());
 
-// Simple mock data generators
+// ---- Domain mock generators ----
+
 function getPortfolioSummary() {
   const baseEquity = 123450;
-  const drift = (Math.random() * 1000 - 500); // +/- 500
+  const drift = Math.random() * 1000 - 500; // +/- 500
   const totalEquity = Math.round(baseEquity + drift);
 
   const pnl24hPct = Math.round((4.2 + (Math.random() * 0.8 - 0.4)) * 100) / 100;
   const openRiskUsd = Math.round(18300 + (Math.random() * 800 - 400));
-  const openRiskR = Math.round((3.1 + (Math.random() * 0.4 - 0.2)) * 10) / 10;
+  const openRiskR =
+    Math.round((3.1 + (Math.random() * 0.4 - 0.2)) * 10) / 10;
 
   return {
     totalEquity,
@@ -87,6 +91,24 @@ function getTrades() {
   ];
 }
 
+function getOpsHealth() {
+  const connectivityStates = [
+    "nominal",
+    "degraded on exchange B (mock)",
+    "elevated latency to exchange A (mock)",
+  ];
+  const connectivityNote =
+    connectivityStates[Math.floor(Math.random() * connectivityStates.length)];
+
+  return {
+    executionEngine: "healthy",
+    signalPipeline: "healthy",
+    connectivityNote,
+  };
+}
+
+// ---- Routes ----
+
 // Routes
 app.get("/api/portfolio", (req, res) => {
   console.log("/api/portfolio");
@@ -106,8 +128,17 @@ app.get("/api/trades", (req, res) => {
   res.json(getTrades());
 });
 
+
+app.get("/api/ops", (req, res) => {
+  console.log("/api/ops");
+  console.log(new Date().toLocaleTimeString());
+  res.json(getOpsHealth());
+});
+
+
 app.get("/api/health", (req, res) => {
   console.log("/api/health");
+  console.log(new Date().toLocaleTimeString());
   res.json({
     status: "ok",
     service: "alphaopsdash-backend",
@@ -115,7 +146,9 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Start server
+ 
+// ---- Start server ----
+
 app.listen(PORT, () => {
   console.log(`AlphaOpsDash backend listening on http://localhost:${PORT}`);
 });
