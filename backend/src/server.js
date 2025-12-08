@@ -89,18 +89,25 @@ function getTrades() {
 
 // Routes
 app.get("/api/portfolio", (req, res) => {
+  console.log("/api/portfolio");
+  console.log(new Date().toLocaleTimeString());
   res.json(getPortfolioSummary());
 });
 
 app.get("/api/signals", (req, res) => {
+  console.log("/api/signals");
+  console.log(new Date().toLocaleTimeString());
   res.json(getSignals());
 });
 
 app.get("/api/trades", (req, res) => {
+  console.log("/api/trades");
+  console.log(new Date().toLocaleTimeString());
   res.json(getTrades());
 });
 
 app.get("/api/health", (req, res) => {
+  console.log("/api/health");
   res.json({
     status: "ok",
     service: "alphaopsdash-backend",

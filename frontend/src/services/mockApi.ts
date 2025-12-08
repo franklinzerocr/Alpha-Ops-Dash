@@ -1,4 +1,4 @@
-// Simple domain types for the dashboard
+// Types used by the dashboard
 
 export type PortfolioSummary = {
   totalEquity: number;      // in USD
@@ -15,7 +15,8 @@ export type SignalItem = {
   direction: "long" | "short";
   timeframe: string;
   status: "open" | "executed" | "cancelled";
-  plR: number | null; // null if still open
+  plR: number | null;
+  createdAt?: string;
 };
 
 export type OpsHealth = {
@@ -24,84 +25,35 @@ export type OpsHealth = {
   connectivityNote: string;
 };
 
-// Small helper to simulate latency
-function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+// Optional: use env var if present, fallback to localhost:4000
+const API_BASE =
+  (import.meta as any).env?.VITE_API_BASE_URL || "http://localhost:4000";
 
-// Base values to keep things realistic
-const BASE_PORTFOLIO: PortfolioSummary = {
-  totalEquity: 123_450,
-  pnl24hPct: 4.2,
-  openRiskUsd: 18_300,
-  openRiskR: 3.1,
-  activeStrategies: 5,
-  strategiesNote: "3 trend, 2 mean-reversion",
-};
-
-// Slight random drift so it looks "alive"
-function withDrift(value: number, maxDrift: number) {
-  const delta = (Math.random() * 2 - 1) * maxDrift;
-  return Math.round((value + delta) * 100) / 100;
+async function get<T>(path: string): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`);
+  if (!res.ok) {
+    throw new Error(`Request failed: ${res.status} ${res.statusText}`);
+  }
+  return res.json() as Promise<T>;
 }
 
 export async function fetchPortfolioSummary(): Promise<PortfolioSummary> {
-  await delay(150); // simulate network latency
-
-  return {
-    ...BASE_PORTFOLIO,
-    totalEquity: withDrift(BASE_PORTFOLIO.totalEquity, 500),
-    pnl24hPct: withDrift(BASE_PORTFOLIO.pnl24hPct, 0.4),
-    openRiskUsd: withDrift(BASE_PORTFOLIO.openRiskUsd, 400),
-    openRiskR: withDrift(BASE_PORTFOLIO.openRiskR, 0.4),
-  };
+  return get<PortfolioSummary>("/api/portfolio");
 }
 
 export async function fetchRecentSignals(): Promise<SignalItem[]> {
-  await delay(120);
-
-  return [
-    {
-      id: "sig-1",
-      symbol: "BTCUSDT",
-      direction: "long",
-      timeframe: "H1",
-      status: "executed",
-      plR: withDrift(0.8, 0.2),
-    },
-    {
-      id: "sig-2",
-      symbol: "ETHUSDT",
-      direction: "short",
-      timeframe: "M15",
-      status: "open",
-      plR: null,
-    },
-    {
-      id: "sig-3",
-      symbol: "SOLUSDT",
-      direction: "long",
-      timeframe: "H4",
-      status: "executed",
-      plR: withDrift(-0.4, 0.2),
-    },
-  ];
+  return get<SignalItem[]>("/api/signals");
 }
 
+// For now we reuse trades shape as a proxy for ops health if needed later.
+// Here we just keep a placeholder, actual ops health is still mocked in backend-less version.
+// You can later add a real /api/ops endpoint if you want.
 export async function fetchOpsHealth(): Promise<OpsHealth> {
-  await delay(100);
-
-  const connectivityStates = [
-    "nominal",
-    "degraded on exchange B (mock)",
-    "elevated latency (mock)",
-  ];
-  const note =
-    connectivityStates[Math.floor(Math.random() * connectivityStates.length)];
-
+  // Temporary synthetic mapping from backend data is not defined yet,
+  // so we just return a static object to keep the UI working.
   return {
     executionEngine: "healthy",
     signalPipeline: "healthy",
-    connectivityNote: note,
+    connectivityNote: "nominal (backend wired for portfolio & signals)",
   };
 }
