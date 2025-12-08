@@ -85,7 +85,7 @@ function getTrades() {
       size: "1500 SOL",
       rMultiple: -0.7,
       status: "closed",
-      openedAt: "2025-01-01T08:00:00Z",
+      openedAt: "2025-01-01T08:01:00Z",
       closedAt: "2025-01-01T09:00:00Z",
     },
   ];

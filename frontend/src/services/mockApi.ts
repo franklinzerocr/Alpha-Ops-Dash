@@ -19,6 +19,17 @@ export type SignalItem = {
   createdAt?: string;
 };
 
+export type TradeItem = {
+  id: string;
+  symbol: string;
+  side: "long" | "short";
+  size: string;
+  rMultiple: number;
+  status: string;
+  openedAt: string;
+  closedAt: string;
+};
+
 export type OpsHealth = {
   executionEngine: "healthy" | "degraded" | "down";
   signalPipeline: "healthy" | "degraded" | "down";
@@ -45,7 +56,10 @@ export async function fetchRecentSignals(): Promise<SignalItem[]> {
   return get<SignalItem[]>("/api/signals");
 }
 
+export async function fetchTrades(): Promise<TradeItem[]> {
+  return get<TradeItem[]>("/api/trades");
+}
+
 export async function fetchOpsHealth(): Promise<OpsHealth> {
   return get<OpsHealth>("/api/ops");
 }
-
