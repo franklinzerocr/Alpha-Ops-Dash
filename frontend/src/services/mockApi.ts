@@ -9,6 +9,11 @@ export type PortfolioSummary = {
   strategiesNote: string;
 };
 
+export type PortfolioHistoryPoint = {
+  timestamp: string;
+  equity: number;
+};
+
 export type SignalItem = {
   id: string;
   symbol: string;
@@ -50,6 +55,10 @@ async function get<T>(path: string): Promise<T> {
 
 export async function fetchPortfolioSummary(): Promise<PortfolioSummary> {
   return get<PortfolioSummary>("/api/portfolio");
+}
+
+export async function fetchPortfolioHistory(): Promise<PortfolioHistoryPoint[]> {
+  return get<PortfolioHistoryPoint[]>("/api/portfolio/history");
 }
 
 export async function fetchRecentSignals(): Promise<SignalItem[]> {

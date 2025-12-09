@@ -85,7 +85,7 @@ function getTrades() {
       size: "1500 SOL",
       rMultiple: -0.7,
       status: "closed",
-      openedAt: "2025-01-01T08:01:00Z",
+      openedAt: "2025-01-01T08:00:00Z",
       closedAt: "2025-01-01T09:00:00Z",
     },
   ];
@@ -107,38 +107,52 @@ function getOpsHealth() {
   };
 }
 
+// Simple synthetic equity history: last 14 points (e.g. days)
+function getPortfolioHistory() {
+  const baseEquity = 120000;
+  const points = [];
+  const now = Date.now();
+
+  let equity = baseEquity;
+
+  for (let i = 13; i >= 0; i--) {
+    const ts = new Date(now - i * 24 * 60 * 60 * 1000);
+    // random walk
+    const drift = Math.random() * 4000 - 2000; // +/- 2k
+    equity = Math.max(80_000, equity + drift);
+
+    points.push({
+      timestamp: ts.toISOString(),
+      equity: Math.round(equity),
+    });
+  }
+
+  return points;
+}
+
 // ---- Routes ----
 
-// Routes
 app.get("/api/portfolio", (req, res) => {
-  console.log("/api/portfolio");
-  console.log(new Date().toLocaleTimeString());
   res.json(getPortfolioSummary());
 });
 
+app.get("/api/portfolio/history", (req, res) => {
+  res.json(getPortfolioHistory());
+});
+
 app.get("/api/signals", (req, res) => {
-  console.log("/api/signals");
-  console.log(new Date().toLocaleTimeString());
   res.json(getSignals());
 });
 
 app.get("/api/trades", (req, res) => {
-  console.log("/api/trades");
-  console.log(new Date().toLocaleTimeString());
   res.json(getTrades());
 });
 
-
 app.get("/api/ops", (req, res) => {
-  console.log("/api/ops");
-  console.log(new Date().toLocaleTimeString());
   res.json(getOpsHealth());
 });
 
-
 app.get("/api/health", (req, res) => {
-  console.log("/api/health");
-  console.log(new Date().toLocaleTimeString());
   res.json({
     status: "ok",
     service: "alphaopsdash-backend",
@@ -146,7 +160,6 @@ app.get("/api/health", (req, res) => {
   });
 });
 
- 
 // ---- Start server ----
 
 app.listen(PORT, () => {

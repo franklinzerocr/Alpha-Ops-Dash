@@ -7,6 +7,8 @@ import {
   type SignalItem,
   type OpsHealth,
 } from "../services/mockApi";
+import { PortfolioEquityChart } from "../components/charts/PortfolioEquityChart";
+
 
 export function DashboardPage() {
   const [portfolio, setPortfolio] = useState<PortfolioSummary | null>(null);
@@ -146,6 +148,11 @@ export function DashboardPage() {
             {portfolio ? portfolio.strategiesNote : "loading…"}
           </div>
         </div>
+      </section>
+
+      {/* Equity chart */}
+      <section>
+        <PortfolioEquityChart />
       </section>
 
       {/* Signals + Ops Health */}
