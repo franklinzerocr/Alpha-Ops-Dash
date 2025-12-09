@@ -54,3 +54,25 @@ npm run dev
 
 ```
  
+
+## Testing
+
+Both the frontend and backend include basic automated tests.
+
+### Backend
+
+The backend uses Jest and supertest to exercise the HTTP API.
+
+```bash
+cd backend
+npm test
+```
+
+### Frontend
+
+The frontend uses Vitest and React Testing Library.
+
+```bash
+cd frontend
+npm test
+```

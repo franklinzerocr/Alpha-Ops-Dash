@@ -53,7 +53,12 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Starts the HTTP server for the backend API.
-app.listen(PORT, () => {
-  console.log(`AlphaOpsDash backend listening on http://localhost:${PORT}`);
-});
+// Starts the HTTP server only when this file is run directly.
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`AlphaOpsDash backend listening on http://localhost:${PORT}`);
+  });
+}
+
+// Exports the Express application for testing.
+module.exports = app;
