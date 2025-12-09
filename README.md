@@ -15,6 +15,14 @@ It is designed as a compact but realistic full-stack Web3-ready project:
 
 -   Ready for future CEX/DEX or on-chain integrations
 
+
+* * * * *
+
+**Screenshots**
+---------------
+
+`![Main dashboard](docs/dashboard.png)`
+
 * * * * *
 
 **Live Demo**
@@ -42,6 +50,19 @@ It is designed as a compact but realistic full-stack Web3-ready project:
 -   Wallet connect button (EVM providers)
 
 Data is currently provided by an in-memory connector designed to be replaced by real exchange or chain modules.
+
+* * * * *
+
+**Wallet Connectivity**
+-----------------------
+
+-   Uses `window.ethereum` to request accounts
+
+-   Displays shortened address on connect
+
+-   Local disconnect support
+
+-   Designed to extend into signing, chain RPC, or contract interactions
 
 * * * * *
 
@@ -79,51 +100,6 @@ Data is currently provided by an in-memory connector designed to be replaced by 
 -   Jest + Supertest
 
 -   Structured logging middleware
-
-* * * * *
-
-**Architecture Overview**
--------------------------
-
-`backend/
-  src/
-    config.js
-    middleware/
-      requestLogger.js
-    connectors/
-      mockExchangeConnector.js
-    services/
-      portfolioService.js
-      signalService.js
-      tradeService.js
-      opsService.js
-    controllers/
-      portfolioController.js
-      signalController.js
-      tradeController.js
-      opsController.js
-    routes/
-      portfolioRoutes.js
-      signalRoutes.js
-      tradeRoutes.js
-      opsRoutes.js
-    server.js
-
-frontend/
-  src/
-    components/
-      charts/PortfolioEquityChart.tsx
-      layout/Sidebar.tsx
-      layout/Topbar.tsx
-    hooks/
-      useWallet.ts
-    pages/
-      Dashboard.tsx
-      Signals.tsx
-      Infra.tsx
-    services/
-      mockApi.ts
-    setupTests.ts`
 
 * * * * *
 
@@ -183,7 +159,7 @@ LOG_LEVEL=info`
 ### **Frontend (`frontend/.env`)**
 
 `VITE_API_BASE=/api     # for local dev with Vite proxy
-# VITE_API_BASE=https://alpha-ops-dash.onrender.com/api   # production`
+VITE_API_BASE=https://alpha-ops-dash.onrender.com/api   # production`
 
 In Vercel, `VITE_API_BASE` is configured in Project → Environment Variables.
 
@@ -220,41 +196,7 @@ npm test`
 
 Tests are excluded from the production TypeScript build.
 
-* * * * *
-
-**Logging**
------------
-
-Backend logs include:
-
--   Request ID
-
--   Method
-
--   Path
-
--   Status
-
--   Duration (ms)
-
--   Timestamp
-
-All logs come from `middleware/requestLogger.js`.
-
-* * * * *
-
-**Wallet Connectivity**
------------------------
-
--   Uses `window.ethereum` to request accounts
-
--   Displays shortened address on connect
-
--   Local disconnect support
-
--   Designed to extend into signing, chain RPC, or contract interactions
-
-* * * * *
+* * * * * 
 
 **Deployment**
 --------------
@@ -279,18 +221,6 @@ All logs come from `middleware/requestLogger.js`.
 
 -   Env: `VITE_API_BASE=https://alpha-ops-dash.onrender.com/api`
 
-* * * * *
-
-**Screenshots**
----------------
-
-Add screenshots under:
-
-`docs/screenshots/`
-
-Example usage:
-
-`![Main dashboard](docs/screenshots/main-dashboard.png)`
 
 * * * * *
 
