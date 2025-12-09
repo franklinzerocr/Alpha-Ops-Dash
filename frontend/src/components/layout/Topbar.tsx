@@ -1,4 +1,3 @@
-import React from "react";
 import { useWallet } from "../../hooks/useWallet";
 
 function shortenAddress(addr: string) {
