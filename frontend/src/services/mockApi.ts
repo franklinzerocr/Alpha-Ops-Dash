@@ -41,12 +41,10 @@ export type OpsHealth = {
   connectivityNote: string;
 };
 
-// Optional: use env var if present, fallback to localhost:4000
-const API_BASE =
-  (import.meta as any).env?.VITE_API_BASE_URL || "http://localhost:4000";
-
+// Performs an HTTP GET request to the backend API.
+// During development, the Vite proxy forwards "/api" to the backend server.
 async function get<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`);
+  const res = await fetch(path);
   if (!res.ok) {
     throw new Error(`Request failed: ${res.status} ${res.statusText}`);
   }
