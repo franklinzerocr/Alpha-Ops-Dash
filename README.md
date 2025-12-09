@@ -21,7 +21,7 @@ It is designed as a compact but realistic full-stack Web3-ready project:
 **Screenshots**
 ---------------
 
-`![dashboard](frontend/docs/dashboard.PNG)`
+`![dashboard](docs/dashboard.PNG)`
 
 * * * * *
 
