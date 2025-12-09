@@ -9,80 +9,63 @@ import {
 } from "../services/mockApi";
 import { PortfolioEquityChart } from "../components/charts/PortfolioEquityChart";
 
-
 export function DashboardPage() {
   const [portfolio, setPortfolio] = useState<PortfolioSummary | null>(null);
   const [signals, setSignals] = useState<SignalItem[]>([]);
   const [opsHealth, setOpsHealth] = useState<OpsHealth | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
-    async function load() {
+    async function load(initial: boolean) {
+      if (initial) {
+        setIsLoading(true);
+      }
+
       try {
         const [p, s, o] = await Promise.all([
           fetchPortfolioSummary(),
           fetchRecentSignals(),
           fetchOpsHealth(),
         ]);
+
         if (!cancelled) {
           setPortfolio(p);
           setSignals(s);
           setOpsHealth(o);
+          setError(null);
         }
       } catch (err) {
-        console.error("Dashboard refresh error:", err);
+        console.error("Dashboard data load error:", err);
+        if (!cancelled) {
+          setError("Failed to load data from backend API.");
+          setPortfolio(null);
+          setSignals([]);
+          setOpsHealth(null);
+        }
+      } finally {
+        if (initial && !cancelled) {
+          setIsLoading(false);
+        }
       }
     }
 
-    // initial load
-    load();
+    // Initial load
+    void load(true);
 
-    // periodic refresh every 5 seconds
+    // Periodic refresh every 5 seconds
     const id = setInterval(() => {
-      load();
+      void load(false);
     }, 5000);
 
-    // cleanup
     return () => {
       cancelled = true;
       clearInterval(id);
     };
   }, []);
-
-
-
-
-/*  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      try {
-        setIsLoading(true);
-        const [p, s, o] = await Promise.all([
-          fetchPortfolioSummary(),
-          fetchRecentSignals(),
-          fetchOpsHealth(),
-        ]);
-        if (!cancelled) {
-          setPortfolio(p);
-          setSignals(s);
-          setOpsHealth(o);
-        }
-      } catch (err) {
-        console.error("Dashboard load error:", err);
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
-    }
-
-    load(); // one-shot load for now
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);*/
 
   return (
     <div className="space-y-6">
@@ -96,10 +79,12 @@ export function DashboardPage() {
           </p>
         </div>
 
-        <div className="text-xs text-slate-500">
-          {isLoading ? "Updating…" : ""}
+        <div className="text-right text-xs text-slate-500 space-y-0.5">
+          {isLoading && <div>Updating…</div>}
+          {!isLoading && error && (
+            <div className="text-rose-400">Backend unreachable</div>
+          )}
         </div>
-
       </section>
 
       {/* Top stats */}
@@ -121,6 +106,8 @@ export function DashboardPage() {
                 {portfolio.pnl24hPct >= 0 ? "+" : ""}
                 {portfolio.pnl24hPct.toFixed(2)}% last 24h
               </span>
+            ) : error ? (
+              <span className="text-rose-400">No data available</span>
             ) : (
               <span className="text-slate-500">waiting for data…</span>
             )}
@@ -145,7 +132,11 @@ export function DashboardPage() {
             {portfolio ? portfolio.activeStrategies : "—"}
           </div>
           <div className="mt-1 text-xs text-slate-400">
-            {portfolio ? portfolio.strategiesNote : "loading…"}
+            {portfolio
+              ? portfolio.strategiesNote
+              : error
+              ? "No strategy data available"
+              : "loading…"}
           </div>
         </div>
       </section>
@@ -157,17 +148,30 @@ export function DashboardPage() {
 
       {/* Signals + Ops Health */}
       <section className="grid gap-4 md:grid-cols-2">
+        {/* Signals */}
         <div className="rounded-xl border border-slate-800 bg-slate-950/80 p-4">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-medium">Recent Signals</h2>
-            <span className="text-[11px] text-slate-500">mock feed</span>
+            <span className="text-[11px] text-slate-500">
+              trading signal feed
+            </span>
           </div>
           <div className="mt-3 space-y-2 text-xs">
-            {signals.length === 0 ? (
-              <div className="text-slate-500">
-                {isLoading ? "Loading signals…" : "No signals loaded."}
+            {isLoading && !error && (
+              <div className="text-slate-500">Loading signals…</div>
+            )}
+
+            {error && (
+              <div className="text-rose-400">
+                Failed to load trading signals.
               </div>
-            ) : (
+            )}
+
+            {!isLoading && !error && signals.length === 0 && (
+              <div className="text-slate-500">No signals loaded.</div>
+            )}
+
+            {!error &&
               signals.map((sig) => (
                 <div
                   key={sig.id}
@@ -192,20 +196,30 @@ export function DashboardPage() {
                     </span>
                   </span>
                 </div>
-              ))
-            )}
+              ))}
           </div>
         </div>
 
+        {/* Ops Health */}
         <div className="rounded-xl border border-slate-800 bg-slate-950/80 p-4">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-medium">Ops Health</h2>
             <span className="text-[11px] text-slate-500">
-              bots & infra (mock)
+              bots and infrastructure
             </span>
           </div>
           <div className="mt-3 space-y-2 text-xs">
-            {opsHealth ? (
+            {isLoading && !error && (
+              <div className="text-slate-500">Loading ops health…</div>
+            )}
+
+            {error && (
+              <div className="text-rose-400">
+                Failed to load operational health.
+              </div>
+            )}
+
+            {!error && opsHealth && (
               <>
                 <div className="flex items-center justify-between">
                   <span className="text-slate-300">Execution engine</span>
@@ -226,10 +240,10 @@ export function DashboardPage() {
                   </span>
                 </div>
               </>
-            ) : (
-              <div className="text-slate-500">
-                {isLoading ? "Loading ops health…" : "No ops data."}
-              </div>
+            )}
+
+            {!isLoading && !error && !opsHealth && (
+              <div className="text-slate-500">No ops data.</div>
             )}
           </div>
         </div>
