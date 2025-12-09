@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const { requestLogger } = require("./middleware/requestLogger");
@@ -8,19 +9,23 @@ const {
   getPortfolioHistory,
   getOpsHealth,
 } = require("./connectors/mockExchangeConnector");
+const config = require("./config");
+
+
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
 // Middleware for logging and HTTP metadata.
 app.use(requestLogger);
-
-// Handles CORS and JSON body parsing for API requests.
+ 
+// Middleware for CORS configuration
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: config.corsOrigin,
   })
 );
+
 app.use(express.json());
 
 // Route modules for the API.
@@ -55,11 +60,13 @@ app.get("/api/portfolio/history", (req, res) => {
 });
   
 // Starts the HTTP server only when this file is run directly.
-if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`AlphaOpsDash backend listening on http://localhost:${PORT}`);
+if (require.main === module) { 
+  app.listen(config.port, () => {
+    console.log(`AlphaOpsDash backend listening on http://localhost:${config.port}`);
   });
 }
+
+
 
 // Exports the Express application for testing.
 module.exports = app;

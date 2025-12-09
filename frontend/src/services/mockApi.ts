@@ -41,10 +41,13 @@ export type OpsHealth = {
   connectivityNote: string;
 };
 
+// Base URL for the backend API.
+ const API_BASE = import.meta.env.VITE_API_BASE || "/api";
+
 // Performs an HTTP GET request to the backend API.
-// During development, the Vite proxy forwards "/api" to the backend server.
 async function get<T>(path: string): Promise<T> {
-  const res = await fetch(path);
+  const url = `${API_BASE}${path}`;
+  const res = await fetch(url);
   if (!res.ok) {
     throw new Error(`Request failed: ${res.status} ${res.statusText}`);
   }
@@ -52,21 +55,21 @@ async function get<T>(path: string): Promise<T> {
 }
 
 export async function fetchPortfolioSummary(): Promise<PortfolioSummary> {
-  return get<PortfolioSummary>("/api/portfolio");
+  return get<PortfolioSummary>("/portfolio");
 }
 
 export async function fetchPortfolioHistory(): Promise<PortfolioHistoryPoint[]> {
-  return get<PortfolioHistoryPoint[]>("/api/portfolio/history");
+  return get<PortfolioHistoryPoint[]>("/portfolio/history");
 }
 
 export async function fetchRecentSignals(): Promise<SignalItem[]> {
-  return get<SignalItem[]>("/api/signals");
+  return get<SignalItem[]>("/signals");
 }
 
 export async function fetchTrades(): Promise<TradeItem[]> {
-  return get<TradeItem[]>("/api/trades");
+  return get<TradeItem[]>("/trades");
 }
 
 export async function fetchOpsHealth(): Promise<OpsHealth> {
-  return get<OpsHealth>("/api/ops");
+  return get<OpsHealth>("/ops");
 }
