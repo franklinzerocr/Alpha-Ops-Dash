@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const { requestLogger } = require("./middleware/requestLogger");
 const {
   getPortfolioSummary,
   getSignals,
@@ -11,6 +12,9 @@ const {
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+// Middleware for logging and HTTP metadata.
+app.use(requestLogger);
+
 // Handles CORS and JSON body parsing for API requests.
 app.use(
   cors({
@@ -18,6 +22,7 @@ app.use(
   })
 );
 app.use(express.json());
+
 
 // Portfolio summary for the current account or environment.
 app.get("/api/portfolio", (req, res) => {
