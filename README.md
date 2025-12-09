@@ -13,29 +13,44 @@ The vision for AlphaOpsDash is to become the central observability panel for alg
 
 The first version (MVP) uses mocked data but follows a realistic architecture (React frontend + backend API), enabling future integration with exchanges and automated trading engines.
 
-## Tech Stack (MVP)
+## Tech Stack
 
 ### Frontend
 - React + Vite + TypeScript
 - Tailwind CSS
+- Recharts for data visualization
 
 ### Backend
-- TBD (Node.js + Express or Python FastAPI)
-- REST endpoints: `/portfolio`, `/signals`, `/trades`
+- Node.js + Express
+- In-memory exchange connector module under `backend/src/connectors`
+- REST endpoints:
+  - `GET /api/portfolio`
+  - `GET /api/portfolio/history`
+  - `GET /api/signals`
+  - `GET /api/trades`
+  - `GET /api/ops`
+  - `GET /api/health`
 
-### Infra
-- Initial folder structure prepared for future containerization and deployment
+## How to Run (development)
 
-## Project Structure (initial)
+Clone the repository and start both frontend and backend locally.
 
-alphaopsdash/
-frontend/
-backend/
-docs/
-infra/
-README.md
+```bash
+git clone <REPO_URL>
+cd alphaopsdash
+
+# backend
+cd backend
+npm install
+npm run dev
+# backend listens on http://localhost:4000
+
+# frontend (in another terminal)
+cd ../frontend
+npm install
+npm run dev
+# frontend serves the app on http://localhost:5173
 
 
-## How to Run (WIP)
-
-Instructions will be added progressively as the frontend and backend are implemented.
+```
+ 
