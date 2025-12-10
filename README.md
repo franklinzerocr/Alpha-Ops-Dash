@@ -172,7 +172,7 @@ LOG_LEVEL=info`
 ### Frontend (`frontend/.env`)
 
 `VITE_API_BASE=/api                      # local dev with Vite proxy
-# VITE_API_BASE=https://alpha-ops-dash.onrender.com/api   # production`
+VITE_API_BASE=https://alpha-ops-dash.onrender.com/api   # production`
 
 In Vercel, `VITE_API_BASE` is configured as a project Environment Variable.
 
