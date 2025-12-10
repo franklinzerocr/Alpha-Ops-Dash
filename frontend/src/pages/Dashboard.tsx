@@ -3,9 +3,11 @@ import {
   fetchPortfolioSummary,
   fetchRecentSignals,
   fetchOpsHealth,
+  fetchMarketPrice,
   type PortfolioSummary,
   type SignalItem,
   type OpsHealth,
+  type MarketPrice,
 } from "../services/mockApi";
 import { PortfolioEquityChart } from "../components/charts/PortfolioEquityChart";
 
@@ -17,13 +19,17 @@ export function DashboardPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Holds live market price data and its loading/error state.
+  const [marketPrice, setMarketPrice] = useState<MarketPrice | null>(null);
+  const [isMarketLoading, setIsMarketLoading] = useState<boolean>(true);
+  const [marketError, setMarketError] = useState<string | null>(null);
+
+  // Loads dashboard data (portfolio, signals, ops health) with periodic refresh.
   useEffect(() => {
     let cancelled = false;
 
     async function load(initial: boolean) {
-      if (initial) {
-        setIsLoading(true);
-      }
+      if (initial) setIsLoading(true);
 
       try {
         const [p, s, o] = await Promise.all([
@@ -39,7 +45,6 @@ export function DashboardPage() {
           setError(null);
         }
       } catch (err) {
-        console.error("Dashboard data load error:", err);
         if (!cancelled) {
           setError("Failed to load data from backend API.");
           setPortfolio(null);
@@ -47,19 +52,51 @@ export function DashboardPage() {
           setOpsHealth(null);
         }
       } finally {
-        if (initial && !cancelled) {
-          setIsLoading(false);
-        }
+        if (initial && !cancelled) setIsLoading(false);
       }
     }
 
-    // Initial load
     void load(true);
 
-    // Periodic refresh every 5 seconds
     const id = setInterval(() => {
       void load(false);
     }, 5000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, []);
+
+  // Loads live BTC/USD price with periodic refresh and resilient error handling.
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadPrice(initial: boolean) {
+      if (initial) setIsMarketLoading(true);
+
+      try {
+        const data = await fetchMarketPrice();
+
+        if (!cancelled) {
+          setMarketPrice(data);
+          setMarketError(null); // Clear previous errors once data is recovered.
+        }
+      } catch (err) {
+        if (!cancelled) {
+          // Keep previous price if it exists to avoid showing null during transient failures.
+          setMarketError("Failed to load market price.");
+        }
+      } finally {
+        if (initial && !cancelled) setIsMarketLoading(false);
+      }
+    }
+
+    void loadPrice(true);
+
+    const id = setInterval(() => {
+      void loadPrice(false);
+    }, 15000);
 
     return () => {
       cancelled = true;
@@ -75,7 +112,7 @@ export function DashboardPage() {
             Portfolio Overview
           </h1>
           <p className="mt-1 text-sm text-slate-400">
-            High-level view of current portfolio state and bot performance.
+            High-level view of current portfolio state and system performance.
           </p>
         </div>
 
@@ -87,8 +124,8 @@ export function DashboardPage() {
         </div>
       </section>
 
-      {/* Top stats */}
-      <section className="grid gap-4 md:grid-cols-3">
+      {/* Portfolio metrics and live BTC price */}
+      <section className="grid gap-4 md:grid-cols-4">
         <div className="rounded-xl border border-slate-800 bg-slate-950/80 p-4">
           <div className="text-xs uppercase text-slate-500">Total Equity</div>
           <div className="mt-2 text-2xl font-semibold">
@@ -139,6 +176,44 @@ export function DashboardPage() {
               : "loading…"}
           </div>
         </div>
+
+        {/* Live BTC price */}
+        <div className="rounded-xl border border-slate-800 bg-slate-950/80 p-4">
+          <div className="flex items-center justify-between">
+            <div className="text-xs uppercase text-slate-500">
+              Live BTC price
+            </div>
+            <div className="text-[10px] text-slate-500">
+              {marketPrice?.source ?? "market feed"}
+            </div>
+          </div>
+
+          <div className="mt-2 text-xl font-semibold">
+            {isMarketLoading && <span className="text-slate-500">Loading…</span>}
+
+            {!isMarketLoading && marketError && (
+              <span className="text-rose-400">
+                {marketPrice
+                  ? `$${marketPrice.priceUsd.toLocaleString()}`
+                  : "Error"}
+              </span>
+            )}
+
+            {!isMarketLoading && !marketError && marketPrice && (
+              <span>${marketPrice.priceUsd.toLocaleString()}</span>
+            )}
+
+            {!isMarketLoading && !marketError && !marketPrice && (
+              <span className="text-slate-500">No data</span>
+            )}
+          </div>
+
+          <div className="mt-1 text-xs text-slate-500">
+            {marketError
+              ? "Using last known value. Live price temporarily unavailable."
+              : "Price updated periodically from external market data provider."}
+          </div>
+        </div>
       </section>
 
       {/* Equity chart */}
@@ -146,7 +221,7 @@ export function DashboardPage() {
         <PortfolioEquityChart />
       </section>
 
-      {/* Signals + Ops Health */}
+      {/* Signals and operational health */}
       <section className="grid gap-4 md:grid-cols-2">
         {/* Signals */}
         <div className="rounded-xl border border-slate-800 bg-slate-950/80 p-4">
@@ -156,15 +231,14 @@ export function DashboardPage() {
               trading signal feed
             </span>
           </div>
+
           <div className="mt-3 space-y-2 text-xs">
             {isLoading && !error && (
               <div className="text-slate-500">Loading signals…</div>
             )}
 
             {error && (
-              <div className="text-rose-400">
-                Failed to load trading signals.
-              </div>
+              <div className="text-rose-400">Failed to load trading signals.</div>
             )}
 
             {!isLoading && !error && signals.length === 0 && (
@@ -200,7 +274,7 @@ export function DashboardPage() {
           </div>
         </div>
 
-        {/* Ops Health */}
+        {/* Operational health */}
         <div className="rounded-xl border border-slate-800 bg-slate-950/80 p-4">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-medium">Ops Health</h2>
@@ -208,6 +282,7 @@ export function DashboardPage() {
               bots and infrastructure
             </span>
           </div>
+
           <div className="mt-3 space-y-2 text-xs">
             {isLoading && !error && (
               <div className="text-slate-500">Loading ops health…</div>
@@ -227,12 +302,14 @@ export function DashboardPage() {
                     {opsHealth.executionEngine}
                   </span>
                 </div>
+
                 <div className="flex items-center justify-between">
                   <span className="text-slate-300">Signal pipeline</span>
                   <span className="text-emerald-400">
                     {opsHealth.signalPipeline}
                   </span>
                 </div>
+
                 <div className="flex items-center justify-between">
                   <span className="text-slate-300">Exchange connectivity</span>
                   <span className="text-amber-400">

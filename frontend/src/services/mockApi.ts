@@ -73,3 +73,15 @@ export async function fetchTrades(): Promise<TradeItem[]> {
 export async function fetchOpsHealth(): Promise<OpsHealth> {
   return get<OpsHealth>("/ops");
 }
+
+
+export type MarketPrice = {
+  symbol: string;
+  priceUsd: number;
+  source: string;
+};
+
+// Live market price from endpoint
+export async function fetchMarketPrice(): Promise<MarketPrice> {
+  return get<MarketPrice>("/market/price");
+}
