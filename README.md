@@ -1,5 +1,8 @@
 # AlphaOpsDash
 
+![CI](https://github.com/franklinzerocr/Alpha-Ops-Dash/actions/workflows/ci.yml/badge.svg)
+
+
 AlphaOpsDash is an operational dashboard for algorithmic trading systems, focused on portfolio state, signal flow, and infrastructure health.
 
 It is designed as a compact but realistic full-stack Web3-ready project:
