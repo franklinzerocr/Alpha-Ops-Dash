@@ -1,17 +1,10 @@
 # AlphaOpsDash
-
 ![CI](https://github.com/franklinzerocr/Alpha-Ops-Dash/actions/workflows/ci.yml/badge.svg)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Status](https://img.shields.io/badge/status-production--ready-blue)
 
-
-AlphaOpsDash is an operational dashboard for algorithmic trading systems, focused on portfolio state, signal flow, and infrastructure health.
-
-It is designed as a compact but realistic full-stack Web3-ready project:
-
-- React + TypeScript + Tailwind on the frontend  
-- Node.js + Express on the backend  
-- Clean layered architecture (routes → controllers → services → connectors)  
-- EVM wallet connectivity (Metamask, etc.)  
-- Ready for future CEX/DEX or on-chain integrations  
+AlphaOpsDash is a full-stack trading operations dashboard built with React, TypeScript, Vite, Tailwind, Node.js and Express.  
+It demonstrates a layered backend architecture, typed API clients, EVM wallet connectivity, automated testing, CI, and real market-data integration.
 
 ---
 
