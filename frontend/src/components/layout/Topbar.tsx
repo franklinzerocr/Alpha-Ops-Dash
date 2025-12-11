@@ -1,61 +1,56 @@
 import { useWallet } from "../../hooks/useWallet";
 
-function shortenAddress(addr: string) {
-  if (addr.length <= 10) return addr;
+function shortAddr(addr: string) {
   return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 }
 
 export function Topbar() {
-  const { account, isConnecting, error, connect, disconnect } = useWallet();
-
-  const handleClick = () => {
-    if (account) {
-      disconnect();
-    } else {
-      void connect();
-    }
-  };
+  const { address, ethBalance, isAvailable, isConnecting, connect, disconnect } =
+    useWallet();
 
   return (
-    <header className="h-14 border-b border-slate-800 bg-slate-950/80 backdrop-blur flex items-center justify-between px-4">
-      <div>
-        <div className="text-xs uppercase tracking-wide text-slate-500">
-          Overview
+    <header className="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-slate-950/60 backdrop-blur">
+      <h1 className="text-lg font-semibold text-slate-100 tracking-tight">
+        AlphaOpsDash
+      </h1>
+
+      {!isAvailable && (
+        <div className="text-xs text-rose-400">No EVM provider detected</div>
+      )}
+
+      {isAvailable && (
+        <div className="flex items-center gap-3">
+          {address && (
+            <div className="flex items-center gap-2 text-xs text-slate-300">
+              <span className="px-2 py-1 rounded-md bg-slate-800">
+                {shortAddr(address)}
+              </span>
+              {ethBalance && (
+                <span className="px-2 py-1 rounded-md bg-slate-900">
+                  Ξ {ethBalance} ETH
+                </span>
+              )}
+            </div>
+          )}
+
+          {address ? (
+            <button
+              className="text-xs px-3 py-1.5 rounded-md border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-100"
+              onClick={disconnect}
+            >
+              Disconnect
+            </button>
+          ) : (
+            <button
+              disabled={isConnecting}
+              className="text-xs px-3 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-600 text-slate-100"
+              onClick={connect}
+            >
+              {isConnecting ? "Connecting…" : "Connect Wallet"}
+            </button>
+          )}
         </div>
-        <div className="text-sm font-medium text-slate-100">
-          Trading Operations
-        </div>
-      </div>
-
-      <div className="flex items-center gap-3">
-        {error && (
-          <span className="hidden sm:inline-flex text-[10px] text-rose-400">
-            {error}
-          </span>
-        )}
-
-        {account && (
-          <span className="hidden sm:inline-flex text-xs text-slate-400">
-            Connected:{" "}
-            <span className="ml-1 text-emerald-400">
-              {shortenAddress(account)}
-            </span>
-          </span>
-        )}
-
-        <button
-          type="button"
-          onClick={handleClick}
-          disabled={isConnecting}
-          className="inline-flex items-center rounded-md border border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-100 hover:bg-slate-900 disabled:opacity-60 disabled:cursor-not-allowed"
-        >
-          {isConnecting
-            ? "Connecting..."
-            : account
-            ? "Disconnect Wallet"
-            : "Connect Wallet"}
-        </button>
-      </div>
+      )}
     </header>
   );
 }
